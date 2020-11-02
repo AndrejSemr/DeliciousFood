@@ -1,2 +1,2 @@
 # DeliciousFood
-Snall training on the basics of VUE.js
+Small training on the basics of VUE.js
