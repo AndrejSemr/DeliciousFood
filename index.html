@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>VuePlusAPI</title>
+        <script src="https://unpkg.com/vue"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div id="app">
+            {{ message }}
+            <br>
+            <input type="text" v-model="countryName" placeholder="Country?">
+            <button v-on:click="CountryCuisine()">Get country cuisine </button>
+            <hr>
+
+            <div v-if="(items == null)">
+                <p>No data in database. :( </p>
+                <hr>
+            </div>
+
+            <div v-else >
+
+                <div v-if="isList == 1">
+                    <div v-for="item in items">
+
+                        <h3>{{ item.strMeal }}</h3>
+                        <img  v-bind:src="item.strMealThumb">
+                        <br>
+                        <button v-on:click='Details(item.idMeal)'> Details </button>
+                        <hr>
+
+                    </div>
+                </div>
+
+                <div v-else>
+
+                    <h3>{{ menuDetails.strMeal }}</h3>
+                    <a v-bind:href="menuDetails.strYoutube" target="_blank">
+                        <img v-bind:src="menuDetails.strMealThumb" title="Link to Youtube">
+                    </a>
+                    <hr>
+                    <p class="recipe">{{ menuDetails.strInstructions }}</p>
+                    <hr>
+
+                </div>
+
+            </div>
+
+            <div>
+                <a href="https://www.themealdb.com/api.php?ref=apilist.fun" target="_blank">
+                    <p>TheMealDB API</p>
+                </a>
+            </div>
+        </div>
+
+        
+        <script>
+            var app = new Vue({
+              el: '#app',
+              data: {
+                message: 'Hello. Witch country cuisine you want to see?',
+                isList: 1,
+                countryName: "",
+                items: [],
+                menuDetails: ""
+              },
+
+                methods:
+                {
+                    // Method returns list of dishes.
+                    CountryCuisine(){
+                        this.isList = 1;
+                        this.menuDetails = "";
+                        axios.get('https://themealdb.com/api/json/v1/1/filter.php?a='+this.countryName).then( (res) =>{
+                            let object = res.data;
+                            this.items = object.meals;
+                        })
+                    },
+                    
+                    // Method returns dish details.
+                    Details(idMeal){
+                        this.isList = 0;
+                        this.menuDetails = "";
+                        axios.get('https://www.themealdb.com/api/json/v1/1/lookup.php?i='+idMeal).then( (res) =>{
+                            let object = res.data;
+                            this.menuDetails = object.meals[0];
+                        })
+                    }
+                }
+
+            })
+            
+        //<!-- https://www.themealdb.com/api.php?ref=apilist.fun -->
+        </script>
+    </body>
+</html>
