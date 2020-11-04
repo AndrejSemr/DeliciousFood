@@ -12,7 +12,8 @@
             {{ message }}
             <br>
             <input type="text" v-model="countryName" placeholder="Country?">
-            <button v-on:click="CountryCuisine()">Get country cuisine </button>
+            <button :disabled='fildIsFalid' v-on:click="CountryCuisine()" >Get country cuisine </button>
+            <button class ="info_button"title="Information" v-on:click="CallListOfCountries()" > Inf </button>
             <hr>
 
             <div v-if="(items == null)">
@@ -58,14 +59,38 @@
         
         <script>
             var app = new Vue({
-              el: '#app',
-              data: {
-                message: 'Hello. Witch country cuisine you want to see?',
-                isList: 1,
-                countryName: "",
-                items: [],
-                menuDetails: ""
-              },
+                el: '#app',
+                data: {
+                    message: 'Hello. Witch country cuisine you want to see?',
+                    fildIsFalid: true,
+                    isList: 1,
+                    countryName: "",
+                    items: [],
+                    menuDetails: "",
+                    smallMessage: "",
+                    allCountryList: []
+                },
+                watch:{
+                    // Watcher checks is the entred word is name of country's cusine (from list)
+                    countryName: function(){
+                        if(this.countryName == ""){
+                            
+                            this.message = 'Hello. Witch country cuisine you want to see?';
+                            this.fildIsFalid = true;
+
+                        }
+                        else if(this.allCountryList.indexOf(this.countryName) != -1){ 
+
+                            this.message = 'This cuisine exist in the database';
+                            this.fildIsFalid = false;
+                        
+                        }else{
+
+                            this.message = "Enter country cuisine (Ex: Russian, Indian)";
+                            this.fildIsFalid = true;
+                        }
+                    }
+                },
 
                 methods:
                 {
@@ -87,7 +112,36 @@
                             let object = res.data;
                             this.menuDetails = object.meals[0];
                         })
+                    },
+                    
+                    // Method returns list of country
+                    GetAllCountry(){
+                        axios.get('https://www.themealdb.com/api/json/v1/1/list.php?a=list').then( (res) =>{
+                            let object = res.data.meals;
+                            let cuntryList = [];
+                            let index = 0;
+                            object.forEach(obj => {
+                                cuntryList[index] = obj.strArea;
+                                index++;
+                            });
+
+                            this.allCountryList = cuntryList;
+                        })
+                    },
+
+                    //  Method writes list of country (alert)
+                    CallListOfCountries(){
+                        let listOfCountries = "List of availabe regions:\n";
+                        this.allCountryList.forEach(country => {
+                            listOfCountries += '\n' + country;
+                        });
+                        alert(listOfCountries);
                     }
+                
+                },
+
+                beforeMount(){
+                    this.GetAllCountry();
                 }
 
             })

@@ -27,6 +27,22 @@ button {
 button:hover {
     background-color: #3d7a3f; /* Green */
   }
+button:disabled {
+    background-color: #517251; /* Green */
+    color: #3a523a;
+}
+
+.info_button{
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 5px 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 25px;
+}
 
 input{
     height: 30px;
