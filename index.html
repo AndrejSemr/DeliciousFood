@@ -9,44 +9,60 @@
     </head>
     <body>
         <div id="app">
-            {{ message }}
-            <br>
+            <button v-on:click="ShowMyList()" >My menu-list </button>
+            <p>{{ message }}</p>
             <input type="text" v-model="countryName" placeholder="Country?">
-            <button :disabled='fildIsFalid' v-on:click="CountryCuisine()" >Get country cuisine </button>
+            <button :disabled='fildIsFalid' v-on:click="CountryCuisine()" >Get country cuisine</button>
             <button class ="info_button"title="Information" v-on:click="CallListOfCountries()" > Inf </button>
             <hr>
+            <div>
+                <div v-if="(items)">
+                    <p>No data in database. :( </p>
+                    <hr>
+                </div>
 
-            <div v-if="(items == null)">
-                <p>No data in database. :( </p>
-                <hr>
-            </div>
+                <div v-else >
 
-            <div v-else >
+                    <div v-if="isList == 1">
+                        <div v-for="item in items">
 
-                <div v-if="isList == 1">
-                    <div v-for="item in items">
+                            <h3>{{ item.strMeal }}</h3>
+                            <img  v-bind:src="item.strMealThumb">
+                            <br>
+                            <button v-on:click='Details(item.idMeal)'> Details </button>
+                            <hr>
 
-                        <h3>{{ item.strMeal }}</h3>
-                        <img  v-bind:src="item.strMealThumb">
-                        <br>
-                        <button v-on:click='Details(item.idMeal)'> Details </button>
+                        </div>
+                    </div>
+
+                    <div v-else-if="isList == 2">
+                        <div v-for="item in items">
+
+                            <h3>{{ item.strMeal }}</h3>
+                            <a v-bind:href="item.strYoutube" target="_blank">
+                                <img v-bind:src="item.strMealThumb" title="Link to Youtube">
+                            </a>
+                            <hr>
+                            <p class="recipe">{{ menuDetails.strInstructions }}</p>
+                            <button v-on:click='DeleteItemFromList(item)'> Delete </button>
+                            <hr>
+
+                        </div>
+                    </div>
+
+                    <div v-else>
+
+                        <button v-on:click='AddItemToMyList(menuDetails)'> Add to my list </button>
+                        <h3>{{ menuDetails.strMeal }}</h3>
+                        <a v-bind:href="menuDetails.strYoutube" target="_blank">
+                            <img v-bind:src="menuDetails.strMealThumb" title="Link to Youtube">
+                        </a>
+                        <hr>
+                        <p class="recipe">{{ menuDetails.strInstructions }}</p>
                         <hr>
 
                     </div>
                 </div>
-
-                <div v-else>
-
-                    <h3>{{ menuDetails.strMeal }}</h3>
-                    <a v-bind:href="menuDetails.strYoutube" target="_blank">
-                        <img v-bind:src="menuDetails.strMealThumb" title="Link to Youtube">
-                    </a>
-                    <hr>
-                    <p class="recipe">{{ menuDetails.strInstructions }}</p>
-                    <hr>
-
-                </div>
-
             </div>
 
             <div>
@@ -58,6 +74,7 @@
 
         
         <script>
+
             var app = new Vue({
                 el: '#app',
                 data: {
@@ -65,10 +82,12 @@
                     fildIsFalid: true,
                     isList: 1,
                     countryName: "",
-                    items: [],
                     menuDetails: "",
                     smallMessage: "",
+                    items: [],
+                    selectedItems: [],
                     allCountryList: []
+
                 },
                 watch:{
                     // Watcher checks is the entred word is name of country's cusine (from list)
@@ -90,6 +109,7 @@
                             this.fildIsFalid = true;
                         }
                     }
+
                 },
 
                 methods:
@@ -111,6 +131,13 @@
                         axios.get('https://www.themealdb.com/api/json/v1/1/lookup.php?i='+idMeal).then( (res) =>{
                             let object = res.data;
                             this.menuDetails = object.meals[0];
+                        })
+                    },
+
+                    GetItemById(idMeal){
+                        axios.get('https://www.themealdb.com/api/json/v1/1/lookup.php?i='+idMeal).then( (res) =>{
+                            let object = res.data;
+                            return object.meals[0];
                         })
                     },
                     
@@ -136,7 +163,40 @@
                             listOfCountries += '\n' + country;
                         });
                         alert(listOfCountries);
-                    }
+                    },
+
+                    // -----------------------
+                    //  Method adds new item to user list.
+                    AddItemToMyList(item){
+
+                        let indexx = this.selectedItems.find(obj => {
+                                        return obj.idMeal == item.idMeal
+                                    })
+
+                        if(indexx == null){
+                            alert(item.strMeal + " added to list.")
+                            let index = this.selectedItems.length
+                            this.selectedItems[index] = item;
+                        }
+                        else{
+                            alert(item.strMeal + " already in your list!")
+                        }
+                    },
+
+                    // Method deletes item from user list.
+                    DeleteItemFromList(item){
+                        let index = this.selectedItems.indexOf(item);
+                        if (index > -1) {
+                            this.selectedItems.splice(index, 1);
+                        }
+                        this.items = this.selectedItems
+                    },
+
+                    // Method displays a list of selected dishes.
+                    ShowMyList(){
+                        this.isList = 2;
+                        this.items = this.selectedItems
+                    },
                 
                 },
 
